@@ -1,0 +1,14 @@
+# .air.toml
+
+[build]
+bin = "tmp/app.exe" # Binary name with .exe extension
+cmd = "go build -o ./tmp/app.exe ." # Build command with .exe extension
+exclude_dir = ["tmp", "vendor", "node_modules"] # Directories to exclude
+include_ext = ["go", "tpl", "html"] # File extensions to include
+
+[log]
+level = "info"
+color = "true"
+
+[misc]
+clean_on_exit = true
