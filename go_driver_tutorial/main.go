@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"fmt"
 	"log"
 
@@ -24,7 +25,7 @@ func main() {
 // misty := Trainer{"Misty", 10, "Cerulean City"}
 // brock := Trainer{"Brock", 15, "Pewter City"}
 
-clientOptions := options.Client().ApplyURI("mongodb+srv://bisratbnegus:GsuWsJx1mldFHMIu@cluster0.q5femhu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb+srv://bisratbnegus:%v@cluster0.q5femhu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", os.Getenv("DB_PASS")))
 
 // Connect to MongoDB
 client, err := mongo.Connect(context.TODO(), clientOptions)
