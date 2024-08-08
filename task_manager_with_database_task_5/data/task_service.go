@@ -37,7 +37,7 @@ func GetTasksByIdDb(id string) (*models.Task, error) {
     err := DbTasks.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
         if err == mongo.ErrNoDocuments {
-            return nil, nil // No document found, return nil without an error
+            return nil, err // No document found, return nil without an error
         }
         return nil, err // Return the error to be handled by the controller
     }

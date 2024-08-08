@@ -11,7 +11,7 @@ import (
 
 func Db() *mongo.Database {
 
-	clientOptions:= options.Client().ApplyURI("mongodb+srv://bisratbnegus:<yourpassword>@cluster0.q5femhu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+	clientOptions:= options.Client().ApplyURI("mongodb+srv://bisratbnegus:<password>@cluster0.q5femhu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 	client,err:= mongo.Connect(context.TODO(), clientOptions ) 
 	if err!= nil{
 		log.Fatal(err)

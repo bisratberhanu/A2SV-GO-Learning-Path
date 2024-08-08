@@ -6,6 +6,7 @@ import (
 	"task_manager_with_database_task_5/models"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetTasks(c *gin.Context) {
@@ -30,6 +31,13 @@ func GetTasksById(c *gin.Context) {
     // Attempt to retrieve the task by ID from the database
     task, err := data.GetTasksByIdDb(id)
     if err != nil {
+		if err == mongo.ErrNoDocuments{
+        c.JSON(http.StatusBadRequest, gin.H{
+			 "error":   "Failed to retrieve task, the Id doesnt exist ",
+            "message": err.Error(),
+        })
+		return 	
+		}
         // If there's an error during the database operation, return a 500 Internal Server Error
         c.JSON(http.StatusInternalServerError, gin.H{
             "error":   "Failed to retrieve task",
