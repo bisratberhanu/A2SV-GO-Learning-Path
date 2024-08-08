@@ -1,3 +1,4 @@
 task_manager_task_4/.air.toml
 task_manager_task_4/go.sum
 task_manager_task_4/tmp/
+go_driver_tutorial/.env
