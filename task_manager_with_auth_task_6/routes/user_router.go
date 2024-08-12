@@ -12,7 +12,7 @@ func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.GET("/users", controllers.GetUsers())
 	incomingRoutes.GET("/users/:user_id", controllers.GetUser())
 	 incomingRoutes.GET("/tasks", controllers.GetTasks)
-	 incomingRoutes.POST("/promote:id", controllers.Promote())
+	 incomingRoutes.POST("/promote/:user_id", controllers.Promote())
     incomingRoutes.GET("/tasks/:id", controllers.GetTasksById)
     incomingRoutes.PUT("/tasks/:id", controllers.UpdateTask)
     incomingRoutes.DELETE("/tasks/:id", controllers.DeleteById)
