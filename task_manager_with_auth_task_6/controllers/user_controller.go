@@ -204,3 +204,36 @@ func GetUser() gin.HandlerFunc {
 
 }
 	}
+
+
+
+func Promote() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        // Check if the user is an admin
+        userType, exists := c.Get("usertype")
+        if !exists || userType != "ADMIN" {
+            c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized to perform this action"})
+            return
+        }
+
+        // Get the user ID from the request
+        userId := c.Param("userId")
+        objId, err := primitive.ObjectIDFromHex(userId)
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+            return
+        }
+
+        // Update the user type to ADMIN
+        filter := bson.M{"_id": objId}
+        update := bson.M{"$set": bson.M{"usertype": "ADMIN", "updatedat": time.Now()}}
+
+        _, err = userCollections.UpdateOne(context.TODO(), filter, update)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating user type"})
+            return
+        }
+
+        c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin successfully"})
+    }
+}

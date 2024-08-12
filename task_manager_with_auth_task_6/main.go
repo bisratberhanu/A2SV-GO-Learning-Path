@@ -22,8 +22,8 @@ func main() {
 
     router := gin.New()
     router.Use(gin.Logger())
-    routes.AuthRoutes(router) // Correctly using the routes package
-    routes.UserRoutes(router) // Correctly using the routes package
+    routes.AuthRoutes(router) 
+    routes.UserRoutes(router) 
 
     router.Run(":" + port)
 }
