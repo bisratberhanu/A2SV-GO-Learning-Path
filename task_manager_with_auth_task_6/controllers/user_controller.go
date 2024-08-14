@@ -191,6 +191,7 @@ func GetUser() gin.HandlerFunc {
         c.JSON(http.StatusOK, user)
     }
 }
+
 func Promote() gin.HandlerFunc {
     return func(c *gin.Context) {
         // Check if the user is an admin
@@ -207,7 +208,6 @@ func Promote() gin.HandlerFunc {
 
         // Update the user type to ADMIN
         filter := bson.M{"userid": userId}
-        fmt.Println("Filter:", filter)
         update := bson.M{"$set": bson.M{"usertype": "ADMIN", "updatedat": time.Now()}}
 
         res, err := userCollections.UpdateOne(ctx, filter, update)
@@ -216,7 +216,6 @@ func Promote() gin.HandlerFunc {
             return
         }
 
-        fmt.Println("MatchedCount:", res.MatchedCount, "ModifiedCount:", res.ModifiedCount)
 
         if res.MatchedCount == 0 {
             c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})

@@ -1,4 +1,4 @@
-module task_manager_with_auth_task_6
+module task_manger_clean_architecture
 
 go 1.22.5
 
