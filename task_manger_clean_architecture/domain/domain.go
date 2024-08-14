@@ -55,8 +55,9 @@ type UserRepository interface {
     Login(ctx context.Context, email string) (*User, error)
     GetUsers(ctx context.Context, startIndex int64, recordsPerPage int64) ([]*User, error)
     GetUser(ctx context.Context, user_id string) (User, error)
-    Promote(ctx context.Context, user_id string, userType string) error
+    Promote(ctx context.Context, user_id string, userType string) (error, int64, int64)
 	UpdateAllTokens(token string, refreshToken string, user_id string) error
+	GetUserByEmail(c context.Context, email string) (User, error)
 
 }
 type UserUseCase interface {
@@ -64,7 +65,8 @@ type UserUseCase interface {
     Login(c context.Context, email string) (*User, error)
     GetUsers(c context.Context, startIndex int64, recordsPerPage int64) ([]*User, error)
     GetUser(c context.Context, user_id string) (User, error)
-    Promote(c context.Context, user_id string, userType string) error
+    Promote(c context.Context, user_id string, userType string) (error, int64, int64)
 	UpdateAllTokens(token string, refreshToken string, user_id string) error
+	GetUserByEmail(c context.Context,email string) (User, error) 
 
 }

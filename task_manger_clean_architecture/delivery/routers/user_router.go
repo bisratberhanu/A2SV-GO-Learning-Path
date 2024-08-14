@@ -11,11 +11,11 @@ import (
 )
 
 func NewUserRouter(timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
-	ur := repositories.NewUserRepository(db, "tasks")
+	ur := repositories.NewUserRepository(db, "user")
 	uc := &controllers.UserController{
 		UserUseCase: usecases.NewUserUseCase(ur, timeout),
 	}
 	group.GET("/users", uc.GetUsers())
 	group.GET("/users/:user_id", uc.GetUser())
-	group.GET("/promote/:user_id", uc.Promote())
+	group.POST("/promote/:user_id", uc.Promote())
 }

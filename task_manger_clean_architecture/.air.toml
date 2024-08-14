@@ -1,0 +1,11 @@
+# Config file for air
+[build]
+# Working directory
+bin = "bin/main.exe"
+cmd = "go build -o ./bin/main.exe ./delivery"
+# Binary file will be generated in this directory
+full_bin = "bin/main.exe"
+
+[run]
+# Command to run the binary
+cmd = "./bin/main.exe"

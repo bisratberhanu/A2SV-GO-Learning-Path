@@ -11,13 +11,13 @@ import (
 )
 
 func NewTaskRouter( timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
-	tr := repositories.NewTaskRepository(db, "tasks")
+	tr := repositories.NewTaskRepository(db, "task")
 	tc := &controllers.TaskController{
 		TaskUseCase: usecases.NewTaskUseCase(tr, timeout),
 	}
 	group.POST("/task", tc.AddTask())
 	group.GET("/task", tc.GetTasks())
-	group.POST("/task/:task_id", tc.GetTasksById())
+	group.GET("/task/:task_id", tc.GetTasksById())
 	group.DELETE("/task/:task_id", tc.DeleteById())
 	group.PUT("/task/:task_id", tc.UpdateTask())
 }

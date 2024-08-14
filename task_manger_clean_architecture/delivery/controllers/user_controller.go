@@ -25,7 +25,7 @@ func (uc *UserController) Signup() gin.HandlerFunc {
 
         var user domain.User
         if err := c.BindJSON(&user); err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            c.JSON(http.StatusBadRequest, gin.H{"error": "couldnt bind user to using bindJson"})
             return
         }
 
@@ -35,14 +35,31 @@ func (uc *UserController) Signup() gin.HandlerFunc {
             return
         }
 
+        // Check if the user already exists by email
+        existingUser, err := uc.UserUseCase.GetUserByEmail(ctx, *user.Email)
+        fmt.Println(err)
+        fmt.Println(existingUser)
+        if err == nil && existingUser.UserId != "" {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "user already exist "})
+            return
+        }
+
+        
+        
         // Hash the password
         password := infrastructure.HashPassword(*user.Password)
         user.Password = &password
+
         // Set additional user fields
         user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
         user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
         user.ID = primitive.NewObjectID()
         user.UserId = user.ID.Hex()
+
+        // Generate tokens
+        token, refreshToken, _ := infrastructure.GenerateAllTokens(*user.Email, user.FirstName, user.LastName, user.UserType, &user.UserId)
+        user.Token = &token
+        user.RefreshToken = &refreshToken
 
         // Call the use case to sign up the user
         resultInsertionNumber, err := uc.UserUseCase.Signup(ctx, user)
@@ -55,6 +72,8 @@ func (uc *UserController) Signup() gin.HandlerFunc {
         c.JSON(http.StatusOK, gin.H{"insertionnumber": resultInsertionNumber})
     }
 }
+
+
 
 func (uc *UserController) Login() gin.HandlerFunc {
     return func(c *gin.Context) {
@@ -88,11 +107,22 @@ func (uc *UserController) Login() gin.HandlerFunc {
 
         // Generate tokens
         token, refreshToken, _ := infrastructure.GenerateAllTokens(*foundUser.Email, foundUser.FirstName, foundUser.LastName, foundUser.UserType, &foundUser.UserId)
-        uc.UserUseCase.UpdateAllTokens(token, refreshToken, foundUser.UserId)
+
+        // Update tokens in the database
+        err = uc.UserUseCase.UpdateAllTokens(token, refreshToken, foundUser.UserId)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update tokens"})
+            return
+        }
+
+        // Update the foundUser object with the new tokens
+        foundUser.Token = &token
+        foundUser.RefreshToken = &refreshToken
 
         c.JSON(http.StatusOK, foundUser)
     }
 }
+
 
 func (uc *UserController) GetUsers() gin.HandlerFunc {
     return func(c *gin.Context) {
@@ -118,6 +148,7 @@ func (uc *UserController) GetUsers() gin.HandlerFunc {
 
         users, err := uc.UserUseCase.GetUsers(ctx, startIndex, int64(recordsPerPage))
         if err != nil {
+            // Log the actual error for debugging
             c.JSON(http.StatusInternalServerError, gin.H{"error": "error occurred while listing user items"})
             return
         }
@@ -125,6 +156,7 @@ func (uc *UserController) GetUsers() gin.HandlerFunc {
         c.JSON(http.StatusOK, users)
     }
 }
+
 
 func (uc *UserController) GetUser() gin.HandlerFunc {
     return func(c *gin.Context) {
@@ -163,9 +195,18 @@ func (uc *UserController) Promote() gin.HandlerFunc {
         defer cancel()
 
         // Call the use case to promote the user
-        err := uc.UserUseCase.Promote(ctx, userId, "ADMIN")
+        err, matchedCount, modifiedCount := uc.UserUseCase.Promote(ctx, userId, "ADMIN")
+        fmt.Println(matchedCount, modifiedCount)
         if err != nil {
             c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating user type"})
+            return
+        }
+        if matchedCount==0{
+            c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
+            return
+        }
+        if modifiedCount == 0{
+            c.JSON(http.StatusBadRequest, gin.H{"error": "user already found"})
             return
         }
 

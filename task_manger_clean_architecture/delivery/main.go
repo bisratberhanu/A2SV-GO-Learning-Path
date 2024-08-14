@@ -1,16 +1,17 @@
 package main
 
 import (
-    "context"
-    "log"
-    "os"
-    "task_manger_clean_architecture/delivery/routers"
-    "time"
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"task_manger_clean_architecture/delivery/routers"
+	"time"
 
-    "github.com/gin-gonic/gin"
-    "github.com/joho/godotenv"
-    "go.mongodb.org/mongo-driver/mongo"
-    "go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-
+	fmt.Println("database connected successfully")
     contextTimeout, err := time.ParseDuration(os.Getenv("CONTEXT_TIMEOUT"))
     if err != nil {
         log.Fatal("Error parsing context timeout:", err)

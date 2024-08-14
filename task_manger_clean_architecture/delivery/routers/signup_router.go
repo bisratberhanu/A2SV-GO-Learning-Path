@@ -11,7 +11,7 @@ import (
 )
 
 func NewSignUPRouter(timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
-	ur := repositories.NewUserRepository(db, "tasks")
+	ur := repositories.NewUserRepository(db, "user")
 	uc := &controllers.UserController{
 		UserUseCase: usecases.NewUserUseCase(ur, timeout),
 	}
