@@ -36,7 +36,7 @@ func (tc *TaskController) GetTasks() gin.HandlerFunc {
 
 func (tc *TaskController) GetTasksById() gin.HandlerFunc {
     return func(c *gin.Context) {
-        id := c.Param("id")
+        id := c.Param("task_id")
 
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
         defer cancel()
@@ -112,7 +112,7 @@ func (tc *TaskController) DeleteById() gin.HandlerFunc {
             return
         }
 
-        id := c.Param("id")
+        id := c.Param("task_id")
 
         var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
         defer cancel()
