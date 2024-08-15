@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"task_manger_clean_architecture/domain"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserUseCase struct {
@@ -63,6 +65,11 @@ func (u *UserUseCase) Promote(c context.Context, user_id string, userType string
 
 // Signup implements domain.UserUseCase.
 func (u *UserUseCase) Signup(c context.Context, user domain.User) (interface{}, error) {
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	user.ID = primitive.NewObjectID()
+	user.UserId = user.ID.Hex()
+
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
 	return u.UserRepository.Signup(ctx, user)

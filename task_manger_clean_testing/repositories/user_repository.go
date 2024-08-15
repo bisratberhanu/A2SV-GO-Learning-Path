@@ -78,7 +78,7 @@ func (u *userRepository) GetUsers(ctx context.Context, startIndex int64, records
         return nil, fmt.Errorf("cursor error: %v", err)
     }
 
-    if len(result) == 0 {
+    if len(result) == 0 || len(result[0]["user_items"].(primitive.A))==0{
         fmt.Println("No users found")
         return nil, fmt.Errorf("no users found")
     }
@@ -163,33 +163,29 @@ func (u *userRepository) Login(ctx context.Context, email string) (*domain.User,
 
 	return &user, nil
 }
+func (u *userRepository) Promote(ctx context.Context, user_id string, userType string) (error, int64, int64) {
+    collection := u.database.Collection(u.collection)
 
-// Promote implements domain.UserRepository.
-func (u *userRepository) Promote(ctx context.Context, user_id string, userType string)( error,int64, int64 ){
-	collection := u.database.Collection(u.collection)
+    // Update the user type to ADMIN
+    filter := bson.M{"userid": user_id}
+    update := bson.M{"$set": bson.M{"usertype": userType, "updatedat": time.Now()}}
 
-	// Update the user type to ADMIN
-	filter := bson.M{"userid": user_id}
-	update := bson.M{"$set": bson.M{"usertype": userType, "updatedat": time.Now()}}
+    res, err := collection.UpdateOne(ctx, filter, update)
+    if err != nil {
+        return fmt.Errorf("error updating user type: %v", err), 0, 0
+    }
 
-	res, err := collection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return fmt.Errorf("error updating user type: %v", err),0,0
-	}
+    if res.MatchedCount == 0 {
+        return fmt.Errorf("user not found"), 0, 0
+    }
 
-	
-
-	return nil, res.MatchedCount,res.ModifiedCount
+    return nil, res.MatchedCount, res.ModifiedCount
 }
 
 // Signup implements domain.UserRepository.
 func (u *userRepository) Signup(ctx context.Context, user domain.User) (interface{}, error) {
 	// Set timestamps and IDs
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
-	user.ID = primitive.NewObjectID()
-	user.UserId = user.ID.Hex()
-
+	
 	// Insert the user into the database
 	result, err := u.database.Collection(u.collection).InsertOne(ctx, user)
 	if err != nil {
