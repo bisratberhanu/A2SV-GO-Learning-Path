@@ -1,110 +1,121 @@
 package usecases
 
 import (
-    "context"
-    "testing"
-    "time"
-    "task_manger_clean_architecture/domain"
-    "task_manger_clean_architecture/domain/mocks"
+	"context"
+	"task_manger_clean_architecture/domain"
+	"task_manger_clean_architecture/domain/mocks"
+	"testing"
+	"time"
 
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestAddTask(t *testing.T) {
-    mockRepo := new(mocks.TaskRepository)
-    task := domain.Task{
-        ID:          "1",
-        Title:       "Test Task",
-        Description: "This is a test task",
-        DueDate:     time.Now(),
-        Status:      "Pending",
-    }
-
-    mockRepo.On("AddTask", mock.Anything, task).Return(nil)
-
-    err := mockRepo.AddTask(context.Background(), task)
-    assert.NoError(t, err)
-
-    mockRepo.AssertExpectations(t)
+type TaskUseCaseTestSuite struct {
+	suite.Suite
+	mockRepo    *mocks.TaskRepository
+	taskUseCase domain.TaskUsecase
 }
 
-func TestDeleteById(t *testing.T) {
-    mockRepo := new(mocks.TaskRepository)
-    id := "1"
-
-    mockRepo.On("DeleteById", mock.Anything, id).Return(int64(1), nil)
-
-    count, err := mockRepo.DeleteById(context.Background(), id)
-    assert.NoError(t, err)
-    assert.Equal(t, int64(1), count)
-
-    mockRepo.AssertExpectations(t)
+func (suite *TaskUseCaseTestSuite) SetupSuite() {
+	suite.mockRepo = new(mocks.TaskRepository)
+	suite.taskUseCase = NewTaskUseCase(suite.mockRepo, time.Second*2)
 }
 
-func TestGetTasks(t *testing.T) {
-    mockRepo := new(mocks.TaskRepository)
-    tasks := []*domain.Task{
-        {
-            ID:          "1",
-            Title:       "Test Task 1",
-            Description: "This is the first test task",
-            DueDate:     time.Now(),
-            Status:      "Pending",
-        },
-        {
-            ID:          "2",
-            Title:       "Test Task 2",
-            Description: "This is the second test task",
-            DueDate:     time.Now(),
-            Status:      "Completed",
-        },
-    }
+func (suite *TaskUseCaseTestSuite) TestAddTask() {
+	task := domain.Task{
+		ID:          "1",
+		Title:       "Test Task",
+		Description: "This is a test task",
+		DueDate:     time.Now(),
+		Status:      "Pending",
+	}
 
-    mockRepo.On("GetTasks", mock.Anything).Return(tasks, nil)
+	suite.mockRepo.On("AddTask", mock.Anything, task).Return(nil)
 
-    result, err := mockRepo.GetTasks(context.Background())
-    assert.NoError(t, err)
-    assert.Equal(t, tasks, result)
+	err := suite.taskUseCase.AddTask(context.Background(), task)
+	assert.NoError(suite.T(), err)
 
-    mockRepo.AssertExpectations(t)
+	suite.mockRepo.AssertExpectations(suite.T())
 }
 
-func TestGetTasksById(t *testing.T) {
-    mockRepo := new(mocks.TaskRepository)
-    id := "1"
-    task := &domain.Task{
-        ID:          id,
-        Title:       "Test Task",
-        Description: "This is a test task",
-        DueDate:     time.Now(),
-        Status:      "Pending",
-    }
+func (suite *TaskUseCaseTestSuite) TestDeleteById() {
+	id := "1"
 
-    mockRepo.On("GetTasksById", mock.Anything, id).Return(task, nil)
+	suite.mockRepo.On("DeleteById", mock.Anything, id).Return(int64(1), nil)
 
-    result, err := mockRepo.GetTasksById(context.Background(), id)
-    assert.NoError(t, err)
-    assert.Equal(t, task, result)
+	count, err := suite.taskUseCase.DeleteById(context.Background(), id)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), int64(1), count)
 
-    mockRepo.AssertExpectations(t)
+	suite.mockRepo.AssertExpectations(suite.T())
 }
 
-func TestUpdateTask(t *testing.T) {
-    mockRepo := new(mocks.TaskRepository)
-    id := "1"
-    updatedTask := domain.Task{
-        ID:          id,
-        Title:       "Updated Task",
-        Description: "This is an updated task",
-        DueDate:     time.Now(),
-        Status:      "In Progress",
-    }
+func (suite *TaskUseCaseTestSuite) TestGetTasks() {
+	tasks := []*domain.Task{
+		{
+			ID:          "1",
+			Title:       "Test Task 1",
+			Description: "This is the first test task",
+			DueDate:     time.Now(),
+			Status:      "Pending",
+		},
+		{
+			ID:          "2",
+			Title:       "Test Task 2",
+			Description: "This is the second test task",
+			DueDate:     time.Now(),
+			Status:      "Completed",
+		},
+	}
 
-    mockRepo.On("UpdateTask", mock.Anything, id, updatedTask).Return(nil)
+	suite.mockRepo.On("GetTasks", mock.Anything).Return(tasks, nil)
 
-    err := mockRepo.UpdateTask(context.Background(), id, updatedTask)
-    assert.NoError(t, err)
+	result, err := suite.taskUseCase.GetTasks(context.Background())
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), tasks, result)
 
-    mockRepo.AssertExpectations(t)
+	suite.mockRepo.AssertExpectations(suite.T())
+}
+
+func (suite *TaskUseCaseTestSuite) TestGetTasksById() {
+	id := "1"
+	task := &domain.Task{
+		ID:          id,
+		Title:       "Test Task",
+		Description: "This is a test task",
+		DueDate:     time.Now(),
+		Status:      "Pending",
+	}
+
+	suite.mockRepo.On("GetTasksById", mock.Anything, id).Return(task, nil)
+
+	result, err := suite.taskUseCase.GetTasksById(context.Background(), id)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), task, result)
+
+	suite.mockRepo.AssertExpectations(suite.T())
+}
+
+func (suite *TaskUseCaseTestSuite) TestUpdateTask() {
+	id := "1"
+	updatedTask := domain.Task{
+		ID:          id,
+		Title:       "Updated Task",
+		Description: "This is an updated task",
+		DueDate:     time.Now(),
+		Status:      "In Progress",
+	}
+
+	suite.mockRepo.On("UpdateTask", mock.Anything, id, updatedTask).Return(nil)
+
+	err := suite.taskUseCase.UpdateTask(context.Background(), id, updatedTask)
+	assert.NoError(suite.T(), err)
+
+	suite.mockRepo.AssertExpectations(suite.T())
+}
+
+func TestTaskUseCaseTestSuite(t *testing.T) {
+	suite.Run(t, new(TaskUseCaseTestSuite))
 }
